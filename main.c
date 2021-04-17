@@ -8,6 +8,9 @@
 #define PLAYER_HEIGHT 10
 #define BALL_RADIUS 12
 
+//Returns the absolute value of the values in a Vector2 struct
+void AbsX(Vector2 *vPtr);
+
 int main(void)
 {
     //Initialization
@@ -44,6 +47,7 @@ int main(void)
     Vector2 ballSpeed = {5.0f, 4.0f};
 
     bool playing_status = 0;
+    //bool collision = 0;
 
     //Main game loop
     while (!WindowShouldClose())
@@ -54,12 +58,12 @@ int main(void)
         //Player Position
         if (IsKeyDown(KEY_LEFT))
         {
-            playerPos.x -= 4.0f;
+            playerPos.x -= 6.0f;
             //playing_status = 1;
         }
         if (IsKeyDown(KEY_RIGHT))
         {
-            playerPos.x += 4.0f;
+            playerPos.x += 6.0f;
             //playing_status = 1;
         }
 
@@ -72,6 +76,8 @@ int main(void)
         }
 
         //Collision
+
+        //Collision with walls
         if ((ballPos.x >= (screenWidth - BALL_RADIUS)) || (ballPos.x <= BALL_RADIUS))
         {
             ballSpeed.x *= -1.0f;
@@ -80,6 +86,35 @@ int main(void)
         {
             ballSpeed.y *= -1.0f;
         };
+
+        //Collision with player (Splitting the bar into three parts: left, middle, right)
+        /*
+        if ((ballPos.x >= playerPos.x) && (ballPos.x <= (playerPos.x + PLAYER_WIDTH)) && (ballPos.y >= playerPos.y) && (ballPos.y <= (playerPos.y + PLAYER_HEIGHT)))
+        {
+            ballSpeed.x *= -1.0f;
+            ballSpeed.y *= -1.0f;
+        }
+        */
+        //Left
+        if ((ballPos.x >= (playerPos.x - BALL_RADIUS)) && (ballPos.x < (playerPos.x - BALL_RADIUS + (0.33f * PLAYER_WIDTH))) && (ballPos.y >= (playerPos.y - BALL_RADIUS)) && (ballPos.y <= (playerPos.y + PLAYER_HEIGHT - BALL_RADIUS)))
+        {
+            AbsX(&ballSpeed);
+            ballSpeed.x *= -1.0f;
+            ballSpeed.y *= -1.0f;
+        }
+
+        //Middle
+        if ((ballPos.x >= (playerPos.x - BALL_RADIUS + (0.33f * PLAYER_WIDTH))) && (ballPos.x < (playerPos.x - BALL_RADIUS + (0.66f * PLAYER_WIDTH))) && (ballPos.y >= (playerPos.y - BALL_RADIUS)) && (ballPos.y <= (playerPos.y + PLAYER_HEIGHT - BALL_RADIUS)))
+        {
+            ballSpeed.y *= -1.0f;
+        }
+
+        //Right
+        if ((ballPos.x >= (playerPos.x - BALL_RADIUS + (0.66f * PLAYER_WIDTH))) && (ballPos.x <= (playerPos.x - BALL_RADIUS + PLAYER_WIDTH)) && (ballPos.y >= (playerPos.y - BALL_RADIUS)) && (ballPos.y <= (playerPos.y + PLAYER_HEIGHT - BALL_RADIUS)))
+        {
+            AbsX(&ballSpeed);
+            ballSpeed.y *= -1.0f;
+        }
 
         //Draw
         BeginDrawing();
@@ -104,7 +139,7 @@ int main(void)
                 {
                     blockArray[i].status = 0;
                     ballSpeed.x *= -1.0f;
-                    ballSpeed.x *= -1.0f;
+                    ballSpeed.y *= -1.0f;
                 }
             }
         }
@@ -115,4 +150,17 @@ int main(void)
     CloseWindow();
 
     return 0;
+}
+
+//Function Definitions
+void AbsX(Vector2 *vPtr)
+{
+    if ((vPtr->x) >= 0)
+    {
+        vPtr->x *= 1.0f;
+    }
+    else
+    {
+        vPtr->x *= -1.0f;
+    }
 }
